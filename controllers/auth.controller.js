@@ -10,43 +10,41 @@ auth.register = async(req,res) =>{
     try {
         const {name, email, password} = await req.body;
         
-    
         if ( !name || !email || !password) {
-          res.status(400).json({
+          return res.status(400).json({
             success: false,
             message: "All fields are required",
           });
         }
-    
-        const hashedPassword = await bcrypt.hash(password, 10);
+
         const existingUser = await userModel.findOne({ email });
         if (existingUser) {
-          res.status(409).json({
+          return res.status(409).json({
             success: false,
             message: "User already exists",
           });
         }
     
+        const hashedPassword = await bcrypt.hash(password, 10);
+
         const newUser = await userModel.create({
           name,
           email,
           password: hashedPassword,
         });
-       await newUser.save();
 
-        res.status(201).json({
+        return res.status(201).json({
           success: true,
           message: "User created successfully",
           payload: newUser,
         });
     
       } catch (err) {
-        res.status(500).json({
+        return res.status(500).json({
           success: false,
           message: err.message,
         });
       }
-    
 }
 
 
@@ -63,29 +61,29 @@ auth.login = async (req, res) => {
       });
     }
     
-    user.active = true;
-    await user.save();
-      
     const passwordMatch = bcrypt.compareSync(password, user.password);
 
-
     if (!passwordMatch) {
-      res.status(400).json({
+      return res.status(400).json({
         message: "Invalid Credentials",
         success: false,
       });
     }
 
-    const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRETKEY, {
-      expiresIn: "1h",
+    user.active = true;
+    await user.save();
+
+    const token = jwt.sign({ _id: user._id, role: user.role }, process.env.JWT_SECRETKEY, {
+      expiresIn: "1d",
     });
+    
     res.cookie("token", token, {
       httpOnly: true, 
       secure: false,  
       sameSite: "strict",
       maxAge:24 * 60 * 60 * 1000 
     });
-    res.status(201).json({
+    return res.status(201).json({
       message: "User Logged in Successfully...",
       success: true,
       payload: {
@@ -98,7 +96,7 @@ auth.login = async (req, res) => {
       },
     });
   } catch (err) {
-    res.status(500).json({
+    return res.status(500).json({
       message: err.message || "Something went Wrong!!! ",
       success: false,
     });
@@ -108,34 +106,24 @@ auth.login = async (req, res) => {
 //logout
 auth.logout = async(req,res)=>{
   try{
-    
-      if (!req.user || !req.user._id) {
-        return res.status(401).json({
-          success: false,
-          message: "Unauthorized: user not found"
-        });
-      }
+    await userModel.findByIdAndUpdate(req.user._id, { active: false });
 
-      await userModel.findByIdAndUpdate(req.user._id, {
-        active: false,
-      });
     res.clearCookie("token", {
       httpOnly: true,
-      secure: false,     
+      secure: false,
       sameSite: "strict"
     });
 
-    res.status(200).json({
-      success:true,
-      message:"User logged Out Successfully"
+    return res.status(200).json({
+      success: true,
+      message: "User logged Out Successfully"
     })
   }
   catch(err){
-    res.status(500).json({
-      success:false,
-      message:err.message || "Something went Wrong"
-
-  })
+    return res.status(500).json({
+      success: false,
+      message: err.message || "Something went Wrong"
+    })
   }
 }
 
@@ -147,7 +135,7 @@ auth.forgotPassword = async(req,res) =>{
    const existsEmail = await userModel.findOne({email}) ;
 
    if(!existsEmail){
-      res.status(400).json({
+      return res.status(400).json({
           message:"User not found",
           success:false
       })
@@ -175,14 +163,14 @@ auth.forgotPassword = async(req,res) =>{
       subject:"Reset Password",
       text:`Please click on the link to reset your password : ${link}`
   })
-  res.status(201).json({
+  return res.status(201).json({
       success:true,
       message:"Password Reset Link Sent Successfully...",
       payload:{data:{email:existsEmail.email}}
   })
   }
   catch(err){
-      res.status(501).json({
+      return res.status(501).json({
           success:false,
           message:err.message || "Failed to change password"
       })
@@ -227,12 +215,12 @@ auth.changePassword = async (req, res) => {
 
     await user.save();
 
-    res.status(200).json({
+    return res.status(200).json({
       message: "Password reset successfully",
       success: true,
     });
   } catch (err) {
-    res.status(500).json({
+    return res.status(500).json({
       message: err.message || "Something went wrong",
       success: false,
     });

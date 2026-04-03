@@ -57,13 +57,13 @@ export const createUser = async (req, res) => {
         role,
       });
   
-      res.status(201).json({
+      return res.status(201).json({
         success: true,
         message: "User created successfully",
         payload: newUser,
       });
     } catch (err) {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: err.message,
       });
@@ -128,7 +128,7 @@ export const updateUser = async(req, res) =>{
             name,
             email,
             password:hashpassword,
-        }, { new: true })
+        }, { new: true, runValidators: true })
 
         return res.status(200).json({
             message:"User Updated Successfully",

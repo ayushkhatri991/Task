@@ -72,7 +72,7 @@ export const createTask = async (req, res) => {
       });
     }
 
-    // Find all active users
+    // Step 1: Get all active employees
     const users = await User.find({ role: "employee", active: true });
 
     if (!users.length) {
@@ -82,30 +82,27 @@ export const createTask = async (req, res) => {
       });
     }
 
-    // Pick the first user who has no pending task
+    // Step 2: Calculate workload for each user (GREEDY)
     let selectedUser = null;
+    let minWorkload = Infinity;
 
     for (let user of users) {
-      const existingTask = await Task.findOne({
+      const tasks = await Task.find({
         assignedTo: user._id,
-        status: "pending"
+        status: { $in: ["pending", "in-progress"] }
       });
 
-      if (!existingTask) {
+      const workload = tasks.reduce(
+        (sum, task) => sum + task.estimatedHours, 0
+      );
+
+      if (workload < minWorkload) {
+        minWorkload = workload;
         selectedUser = user;
-        break;
       }
     }
 
-    // If no user is available
-    if (!selectedUser) {
-      return res.status(400).json({
-        success: false,
-        message: "All users already have a pending task",
-      });
-    }
-
-    // Create task
+    // Step 3: Assign task to least busy user
     const task = await Task.create({
       title,
       description,
@@ -115,19 +112,20 @@ export const createTask = async (req, res) => {
       status: "pending"
     });
 
-    //  Send response
+    await task.populate("assignedTo", "name email");
+
     return res.status(201).json({
       success: true,
-      message: "Task assigned successfully",
+      message: "Task assigned using greedy algorithm",
       assignedTo: selectedUser.name,
+      workload: minWorkload,
       task,
     });
 
   } catch (error) {
-    console.error("Error creating task:", error);
     return res.status(500).json({
       success: false,
-      message: error.message || "Something went wrong",
+      message: error.message,
     });
   }
 };

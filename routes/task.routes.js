@@ -77,7 +77,7 @@ router.get("/queue", authorization, getPriorityQueue);
  * @swagger
  * /task/assign:
  *   post:
- *     summary: Assign a new task to an available employee
+ *     summary: Assign a new task to least busy employee (Greedy Algorithm)
  *     tags: [Task]
  *     security:
  *       - bearerAuth: []
@@ -108,6 +108,35 @@ router.get("/queue", authorization, getPriorityQueue);
  *     responses:
  *       201:
  *         description: Task assigned successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 assignedTo:
+ *                   type: string
+ *                   example: John Doe
+ *                 workload:
+ *                   type: number
+ *                   example: 4
+ *                 task:
+ *                   type: object
+ *                   properties:
+ *                     title:
+ *                       type: string
+ *                       example: Complete API Documentation
+ *                     assignedTo:
+ *                       type: object
+ *                       properties:
+ *                         name:
+ *                           type: string
+ *                           example: John Doe
+ *                         email:
+ *                           type: string
+ *                           example: john@example.com
  *       400:
  *         description: Invalid input or no available users
  *       401:

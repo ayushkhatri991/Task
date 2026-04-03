@@ -21,7 +21,7 @@ try{
     role:"employee"
   })
 
-  res.json({
+  return res.json({
     totalTasks,
     completed,
     pending,
@@ -29,7 +29,7 @@ try{
     employees
   })
 }catch(err){
-    res.status(500).json({
+    return res.status(500).json({
         success: false,
         message: err.message || "Something went wrong while fetching stats"
       })

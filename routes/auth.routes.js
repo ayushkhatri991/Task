@@ -31,8 +31,8 @@ const router = express.Router()
  *                 example: password123
  *               role:
  *                 type: string
- *                 enum: [admin, user]
- *                 example: user
+ *                 enum: [admin, employee]
+ *                 example: employee
  *     responses:
  *       201:
  *         description: User registered successfully
@@ -85,7 +85,7 @@ router.post("/login",auth.login);
  *       401:
  *         description: Unauthorized
  */
-router.post("/logout",auth.logout,authorization);
+router.post("/logout", authorization, auth.logout);
 
 /**
  * @swagger

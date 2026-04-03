@@ -1,8 +1,56 @@
 
 import express from "express";
-import { getAllUsers,getById,updateUser,deleteUser } from "../controllers/user.controller.js";
+import { getAllUsers, getById, updateUser, deleteUser, createUser } from "../controllers/user.controller.js";
 import authorization from "../middlewares/auth.middleware.js";
+import { authRole } from "../middlewares/authRole.js";
 const router = express.Router()
+
+/**
+ * @swagger
+ * /users/create:
+ *   post:
+ *     summary: Create a new user (Admin only)
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *               - email
+ *               - password
+ *               - role
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: John Doe
+ *               email:
+ *                 type: string
+ *                 example: john@example.com
+ *               password:
+ *                 type: string
+ *                 example: password123
+ *               role:
+ *                 type: string
+ *                 enum: [admin, employee]
+ *                 example: employee
+ *     responses:
+ *       201:
+ *         description: User created successfully
+ *       400:
+ *         description: All fields are required
+ *       409:
+ *         description: User already exists
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden - Admin only
+ */
+router.post("/create", authorization, authRole("admin"), createUser)
 
 /**
  * @swagger
@@ -115,7 +163,7 @@ router.get("/:id",getById)
  *       200:
  *         description: User updated successfully
  *       400:
- *         description: Invalid input
+ *         description: All fields are required
  *       401:
  *         description: Unauthorized
  *       404:
