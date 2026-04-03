@@ -146,6 +146,6 @@ router.put("/:id", authorization, updateUser)
  *       404:
  *         description: User not found
  */
-router.delete("/:id", deleteUser,authorization);  
+router.delete("/:id", authorization, deleteUser);
 
 export default router;

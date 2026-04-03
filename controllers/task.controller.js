@@ -1,6 +1,43 @@
 import Task from "../models/task.model.js";
 import User from "../models/user.model.js";
 
+// Priority weights for sorting
+const PRIORITY_WEIGHT = { high: 3, medium: 2, low: 1 };
+
+export const getPriorityQueue = async (req, res) => {
+  try {
+    // Get all pending and in-progress tasks
+    const tasks = await Task.find({
+      status: { $in: ["pending", "in-progress"] }
+    }).populate("assignedTo", "name email");
+
+    if (!tasks.length) {
+      return res.status(404).json({
+        success: false,
+        message: "No tasks in queue"
+      });
+    }
+
+    // Sort by priority weight (high -> medium -> low)
+    const queue = tasks.sort((a, b) => 
+      PRIORITY_WEIGHT[b.priority] - PRIORITY_WEIGHT[a.priority]
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Priority queue fetched successfully",
+      total: queue.length,
+      queue
+    });
+
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Something went wrong"
+    });
+  }
+};
+
 export const getAllTasks = async (req, res) => {
   try {
     const tasks = await Task.find().populate("assignedTo", "name email");
@@ -26,7 +63,7 @@ export const getAllTasks = async (req, res) => {
 
 export const createTask = async (req, res) => {
   try {
-    const { title, description, estimatedHours } = req.body;
+    const { title, description, estimatedHours, priority } = req.body;
 
     if (!title || !description || !estimatedHours) {
       return res.status(400).json({
@@ -74,6 +111,7 @@ export const createTask = async (req, res) => {
       description,
       assignedTo: selectedUser._id,
       estimatedHours,
+      priority: priority || "medium",
       status: "pending"
     });
 
@@ -172,7 +210,7 @@ export const trackTask = async (req, res) => {
     const progress =
       (elapsedHours / task.estimatedHours) * 100;
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       taskId: task._id,
       status: task.status,
@@ -182,7 +220,7 @@ export const trackTask = async (req, res) => {
     });
 
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: error.message
     });

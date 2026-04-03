@@ -1,25 +1,25 @@
 import userSchema from "../models/user.model.js"
-
+import bcrypt from "bcryptjs";
 
 export const getAllUsers = async(req, res) =>{
     try {
         const users = await userSchema.find()
 
-        if(!users){
-            res.status(404).json({
+        if(!users.length){
+            return res.status(404).json({
                 message:"Users not found",
                 success:false,
             })
         }
 
-        res.status(200).json({
+        return res.status(200).json({
             message:"Users fetched successfully",
             success:true,
             users,
         })
         
     } catch (error) {
-        res.status(500).json({
+        return res.status(500).json({
             message:"Something went wrong",
             success:false,
         })
@@ -105,17 +105,17 @@ export const updateUser = async(req, res) =>{
         const {id} = req.params
         const {name, email, password} = req.body
 
-        const user = await userSchema.findById(id)
-
         if(!name || !email || !password){
-            res.status(400).json({
+            return res.status(400).json({
                 message:"All fields are required",
                 success: false,
             })
         }
 
+        const user = await userSchema.findById(id)
+
         if(!user){
-            res.status(400).json({
+            return res.status(404).json({
                 message:"User Not Found",
                 success:false,
             })
@@ -124,22 +124,20 @@ export const updateUser = async(req, res) =>{
         const salt = bcrypt.genSaltSync(10)
         const hashpassword = bcrypt.hashSync(password, salt)
 
-        const updateUser = await userSchema.findByIdAndUpdate(id,{
+        const updatedUser = await userSchema.findByIdAndUpdate(id,{
             name,
             email,
             password:hashpassword,
-        })
+        }, { new: true })
 
-        await updateUser.save()
-
-        res.status(200).json({
+        return res.status(200).json({
             message:"User Updated Successfully",
             success:true,
-            user:updateUser,
+            user:updatedUser,
         })
         
     } catch (error) {
-        res.status(500).json({
+        return res.status(500).json({
             message:error.message,
             success:false,
         })
@@ -152,7 +150,7 @@ export const deleteUser = async(req, res) =>{
         const user = await userSchema.findById(id)
 
         if(!user){
-            res.status(400).json({
+            return res.status(404).json({
                 message:"User Not Found",
                 success:false,
             })
@@ -160,13 +158,13 @@ export const deleteUser = async(req, res) =>{
 
         await userSchema.findByIdAndDelete(id)
 
-        res.status(200).json({
+        return res.status(200).json({
             message:"User Deleted Successfully",
             success:true,
         })
         
     } catch (error) {
-        res.status(500).json({
+        return res.status(500).json({
             message:error.message,
             success:false,
         })

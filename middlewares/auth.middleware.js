@@ -4,8 +4,8 @@ const authorization = async (req, res, next) =>{
     try{
         const authHeader = req.headers.authorization 
 
-        if(!authHeader || !authHeader.startsWith("Bearer"))
-            res.status(401).json({
+        if(!authHeader || !authHeader.startsWith("Bearer "))
+            return res.status(401).json({
                 message:" Token not found!!",
                 success:false
         })

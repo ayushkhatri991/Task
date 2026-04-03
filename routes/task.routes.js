@@ -1,6 +1,6 @@
 
 import express from "express";
-import { createTask, trackTask, updateProgress, getAllTasks } from "../controllers/task.controller.js";
+import { createTask, trackTask, updateProgress, getAllTasks, getPriorityQueue } from "../controllers/task.controller.js";
 import { authRole } from "../middlewares/authRole.js";
 import authorization from "../middlewares/auth.middleware.js";
 const router = express.Router()
@@ -16,6 +16,22 @@ const router = express.Router()
  *     responses:
  *       200:
  *         description: List of all tasks
+ *       401:
+ *         description: Unauthorized
+ */
+router.get("/", authorization, getAllTasks);
+
+/**
+ * @swagger
+ * /task/queue:
+ *   get:
+ *     summary: Get tasks sorted by priority (high -> medium -> low)
+ *     tags: [Task]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Priority queue of pending and in-progress tasks
  *         content:
  *           application/json:
  *             schema:
@@ -24,29 +40,23 @@ const router = express.Router()
  *                 success:
  *                   type: boolean
  *                   example: true
- *                 message:
- *                   type: string
- *                   example: Tasks fetched successfully
- *                 tasks:
+ *                 total:
+ *                   type: number
+ *                   example: 5
+ *                 queue:
  *                   type: array
  *                   items:
  *                     type: object
  *                     properties:
- *                       _id:
- *                         type: string
- *                         example: 507f1f77bcf86cd799439011
  *                       title:
  *                         type: string
- *                         example: Complete API Documentation
- *                       description:
+ *                         example: Fix critical bug
+ *                       priority:
  *                         type: string
- *                         example: Add Swagger docs
+ *                         example: high
  *                       status:
  *                         type: string
- *                         example: in-progress
- *                       estimatedHours:
- *                         type: number
- *                         example: 5
+ *                         example: pending
  *                       assignedTo:
  *                         type: object
  *                         properties:
@@ -56,16 +66,18 @@ const router = express.Router()
  *                           email:
  *                             type: string
  *                             example: john@example.com
+ *       404:
+ *         description: No tasks in queue
  *       401:
  *         description: Unauthorized
  */
-router.get("/", authorization, getAllTasks);
+router.get("/queue", authorization, getPriorityQueue);
 
 /**
  * @swagger
  * /task/assign:
  *   post:
- *     summary: Assign a new task to an available employee (Admin only)
+ *     summary: Assign a new task to an available employee
  *     tags: [Task]
  *     security:
  *       - bearerAuth: []
@@ -89,6 +101,10 @@ router.get("/", authorization, getAllTasks);
  *               estimatedHours:
  *                 type: number
  *                 example: 5
+ *               priority:
+ *                 type: string
+ *                 enum: [low, medium, high]
+ *                 example: high
  *     responses:
  *       201:
  *         description: Task assigned successfully
@@ -96,54 +112,11 @@ router.get("/", authorization, getAllTasks);
  *         description: Invalid input or no available users
  *       401:
  *         description: Unauthorized
- *       403:
- *         description: Forbidden - Admin only
  */
 router.post(
     "/assign",
    authorization,
-   authRole("admin"),
    createTask
-);
-
-/**
- * @swagger
- * /task/{id}:
- *   put:
- *     summary: Update task status
- *     tags: [Task]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *         example: 507f1f77bcf86cd799439011
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               status:
- *                 type: string
- *                 enum: [pending, in-progress, completed]
- *                 example: in-progress
- *     responses:
- *       200:
- *         description: Task updated successfully
- *       401:
- *         description: Unauthorized
- *       404:
- *         description: Task not found
- */
-router.put(
-    "/:id",
-    authorization,
-    updateProgress
 );
 
 /**
@@ -196,8 +169,48 @@ router.put(
  */
 router.get(
     "/:taskId/track",
-  authorization,
+    authorization,
     trackTask
+);
+
+/**
+ * @swagger
+ * /task/{id}:
+ *   put:
+ *     summary: Update task status
+ *     tags: [Task]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: 507f1f77bcf86cd799439011
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               status:
+ *                 type: string
+ *                 enum: [pending, in-progress, completed]
+ *                 example: in-progress
+ *     responses:
+ *       200:
+ *         description: Task updated successfully
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Task not found
+ */
+router.put(
+    "/:id",
+    authorization,
+    updateProgress
 );
 
 export default router;
