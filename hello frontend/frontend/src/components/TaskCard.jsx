@@ -1,0 +1,116 @@
+import { useState } from "react";
+import { trackTask, updateTaskStatus } from "../api/tasks";
+import ProgressBar from "./ProgressBar";
+import PriorityBadge from "./PriorityBadge";
+import toast from "react-hot-toast";
+
+const STATUS_OPTIONS = ["pending", "in-progress", "completed"];
+
+export default function TaskCard({ task, onRefresh, showUpdate = true }) {
+  const [tracking, setTracking] = useState(null);
+  const [trackLoading, setTrackLoading] = useState(false);
+  const [statusLoading, setStatusLoading] = useState(false);
+
+  const handleTrack = async () => {
+    if (tracking) { setTracking(null); return; }
+    setTrackLoading(true);
+    try {
+      const res = await trackTask(task._id);
+      setTracking(res.data);
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Cannot track this task yet");
+    } finally {
+      setTrackLoading(false);
+    }
+  };
+
+  const handleStatusChange = async (newStatus) => {
+    setStatusLoading(true);
+    try {
+      await updateTaskStatus(task._id, { status: newStatus });
+      toast.success(`Status updated to "${newStatus}"`);
+      onRefresh?.();
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to update status");
+    } finally {
+      setStatusLoading(false);
+    }
+  };
+
+  return (
+    <div className="task-card">
+      <div className="task-card-header">
+        <div>
+          <div className="task-card-title">{task.title}</div>
+          {task.assignedTo && (
+            <div className="task-card-assignee">👤 {task.assignedTo.name || task.assignedTo.email || "Assigned"}</div>
+          )}
+        </div>
+        <PriorityBadge priority={task.priority} />
+      </div>
+
+      <p className="task-card-desc">{task.description}</p>
+
+      <div className="task-card-meta">
+        <span className={`badge badge-${task.status}`}>{task.status}</span>
+        <span className="badge" style={{ background: "rgba(139,92,246,0.1)", color: "var(--purple-light)", border: "1px solid rgba(139,92,246,0.2)" }}>
+          ⏱ {task.estimatedHours}h
+        </span>
+
+        {showUpdate && (
+          <select
+            className="form-select"
+            style={{ padding: "0.3rem 0.6rem", fontSize: "0.75rem", width: "auto", marginLeft: "auto" }}
+            value={task.status}
+            onChange={(e) => handleStatusChange(e.target.value)}
+            disabled={statusLoading}
+          >
+            {STATUS_OPTIONS.map((s) => (
+              <option key={s} value={s}>{s}</option>
+            ))}
+          </select>
+        )}
+
+        {task.status === "pending" && showUpdate ? (
+          <button
+            className="btn btn-primary btn-sm"
+            onClick={() => handleStatusChange("in-progress")}
+            disabled={statusLoading}
+            style={{ marginLeft: showUpdate ? "0.5rem" : "auto", background: "var(--purple)", color: "white", border: "none" }}
+          >
+            ▶ Start Task
+          </button>
+        ) : (
+          <button
+            className="btn btn-secondary btn-sm"
+            onClick={handleTrack}
+            disabled={trackLoading}
+            style={{ marginLeft: showUpdate ? "0.5rem" : "auto" }}
+          >
+            {trackLoading ? "..." : tracking ? "Hide" : "📈 Track"}
+          </button>
+        )}
+      </div>
+
+      {tracking && (
+        <div style={{ marginTop: "1rem" }}>
+          <div className="track-info-grid">
+            <div className="track-info-item">
+              <div className="track-info-value">{tracking.elapsedHours}h</div>
+              <div className="track-info-label">Elapsed</div>
+            </div>
+            <div className="track-info-item">
+              <div className="track-info-value">{tracking.remainingHours}h</div>
+              <div className="track-info-label">Remaining</div>
+            </div>
+            <div className="track-info-item">
+              <div className="track-info-value" style={{ color: "var(--emerald)" }}>{tracking.progress}</div>
+              <div className="track-info-label">Progress</div>
+            </div>
+          </div>
+          <ProgressBar percent={parseFloat(tracking.progress)} label="Completion" />
+        </div>
+      )}
+    </div>
+  );
+}
