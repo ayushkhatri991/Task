@@ -68,9 +68,9 @@ export default function AdminDashboardPage() {
 
               <div className="grid-2" style={{ marginTop: "1.5rem" }}>
                 <div className="card card-glass">
-                  <div className="section-title">🤖 Greedy Algorithm</div>
+                  <div className="section-title">🤖 Smart Assignment</div>
                   <p style={{ fontSize: "0.875rem", color: "var(--text-secondary)", lineHeight: "1.7" }}>
-                    Tasks are automatically assigned to the <strong style={{ color: "var(--purple-light)" }}>least busy active employee</strong> by summing pending + in-progress estimated hours per user and picking the minimum.
+                    <strong style={{ color: "var(--purple-light)" }}>High priority</strong> tasks prioritize completely free employees. Otherwise, tasks are assigned to the least busy active employee by summing pending + in-progress estimated hours per user.
                   </p>
                 </div>
                 <div className="card card-glass">

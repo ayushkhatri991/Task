@@ -34,7 +34,7 @@ export default function TaskModal({ onClose, onSuccess }) {
         </div>
 
         <div className="alert alert-info">
-          🤖 Greedy algorithm will auto-assign to the least busy active employee.
+          🤖 <b>Smart Assignment:</b> High priority tasks prioritize completely free employees. Otherwise, the algorithm assigns to the least busy employee.
         </div>
 
         <form onSubmit={handleSubmit}>

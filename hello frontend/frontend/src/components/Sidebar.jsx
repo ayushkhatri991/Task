@@ -48,16 +48,22 @@ export default function Sidebar() {
 
       <div className="sidebar-divider" />
 
-      <div className="sidebar-user">
-        <div className="sidebar-user-avatar">
-          {user?.name?.charAt(0).toUpperCase()}
+      <div className="sidebar-user" style={{ alignItems: "flex-start", flexDirection: "column", gap: "1rem" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", width: "100%" }}>
+          <div className="sidebar-user-avatar">
+            {user?.name?.charAt(0).toUpperCase()}
+          </div>
+          <div className="sidebar-user-info">
+            <div className="sidebar-user-name">{user?.name}</div>
+            <div className="sidebar-user-role">{user?.role}</div>
+          </div>
         </div>
-        <div className="sidebar-user-info">
-          <div className="sidebar-user-name">{user?.name}</div>
-          <div className="sidebar-user-role">{user?.role}</div>
-        </div>
-        <button className="sidebar-logout-btn" onClick={handleLogout} title="Logout">
-          🚪
+        <button 
+          className="btn btn-secondary btn-full btn-sm" 
+          onClick={handleLogout} 
+          style={{ color: "var(--rose)", borderColor: "rgba(244,63,94,0.2)", background: "rgba(244,63,94,0.05)" }}
+        >
+          🚪 Logout
         </button>
       </div>
     </aside>

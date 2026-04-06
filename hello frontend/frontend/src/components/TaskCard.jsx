@@ -3,13 +3,18 @@ import { trackTask, updateTaskStatus } from "../api/tasks";
 import ProgressBar from "./ProgressBar";
 import PriorityBadge from "./PriorityBadge";
 import toast from "react-hot-toast";
+import { useAuth } from "../context/AuthContext";
 
 const STATUS_OPTIONS = ["pending", "in-progress", "completed"];
 
 export default function TaskCard({ task, onRefresh, showUpdate = true }) {
+  const { user } = useAuth();
   const [tracking, setTracking] = useState(null);
   const [trackLoading, setTrackLoading] = useState(false);
   const [statusLoading, setStatusLoading] = useState(false);
+
+  // Only allow updating if showUpdate is true AND the user is an employee
+  const canUpdate = showUpdate && user?.role === "employee";
 
   const handleTrack = async () => {
     if (tracking) { setTracking(null); return; }
@@ -57,7 +62,7 @@ export default function TaskCard({ task, onRefresh, showUpdate = true }) {
           ⏱ {task.estimatedHours}h
         </span>
 
-        {showUpdate && (
+        {canUpdate && (
           <select
             className="form-select"
             style={{ padding: "0.3rem 0.6rem", fontSize: "0.75rem", width: "auto", marginLeft: "auto" }}
@@ -71,12 +76,12 @@ export default function TaskCard({ task, onRefresh, showUpdate = true }) {
           </select>
         )}
 
-        {task.status === "pending" && showUpdate ? (
+        {task.status === "pending" && canUpdate ? (
           <button
             className="btn btn-primary btn-sm"
             onClick={() => handleStatusChange("in-progress")}
             disabled={statusLoading}
-            style={{ marginLeft: showUpdate ? "0.5rem" : "auto", background: "var(--purple)", color: "white", border: "none" }}
+            style={{ marginLeft: canUpdate ? "0.5rem" : "auto", background: "var(--purple)", color: "white", border: "none" }}
           >
             ▶ Start Task
           </button>
@@ -84,8 +89,9 @@ export default function TaskCard({ task, onRefresh, showUpdate = true }) {
           <button
             className="btn btn-secondary btn-sm"
             onClick={handleTrack}
-            disabled={trackLoading}
-            style={{ marginLeft: showUpdate ? "0.5rem" : "auto" }}
+            disabled={trackLoading || task.status === "pending"}
+            title={task.status === "pending" ? "Cannot track pending tasks" : ""}
+            style={{ marginLeft: canUpdate ? "0.5rem" : "auto" }}
           >
             {trackLoading ? "..." : tracking ? "Hide" : "📈 Track"}
           </button>

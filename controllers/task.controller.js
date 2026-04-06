@@ -60,7 +60,6 @@ export const getAllTasks = async (req, res) => {
     });
   }
 };
-
 export const createTask = async (req, res) => {
   try {
     const { title, description, estimatedHours, priority } = req.body;
@@ -72,7 +71,7 @@ export const createTask = async (req, res) => {
       });
     }
 
-    // Step 1: Get all active employees
+    // Get active employees
     const users = await User.find({ role: "employee", active: true });
 
     if (!users.length) {
@@ -82,33 +81,51 @@ export const createTask = async (req, res) => {
       });
     }
 
-    // Step 2: Calculate workload for each user (GREEDY)
     let selectedUser = null;
     let minWorkload = Infinity;
 
-    for (let user of users) {
-      const tasks = await Task.find({
-        assignedTo: user._id,
-        status: { $in: ["pending", "in-progress"] }
-      });
+    //  If HIGH priority → assign to FREE user first
+    if (priority === "high") {
+      for (let user of users) {
+        const existingTask = await Task.findOne({
+          assignedTo: user._id,
+          status: { $in: ["pending", "in-progress"] }
+        });
 
-      const workload = tasks.reduce(
-        (sum, task) => sum + task.estimatedHours, 0
-      );
-
-      if (workload < minWorkload) {
-        minWorkload = workload;
-        selectedUser = user;
+        if (!existingTask) {
+          selectedUser = user;
+          break;
+        }
       }
     }
 
-    // Step 3: Assign task to least busy user
+    // If no free user OR not high priority → GREEDY
+    if (!selectedUser) {
+      for (let user of users) {
+        const tasks = await Task.find({
+          assignedTo: user._id,
+          status: { $in: ["pending", "in-progress"] }
+        });
+
+        const workload = tasks.reduce(
+          (sum, task) => sum + task.estimatedHours,
+          0
+        );
+
+        if (workload < minWorkload) {
+          minWorkload = workload;
+          selectedUser = user;
+        }
+      }
+    }
+
+    // Step 4: Create task
     const task = await Task.create({
       title,
       description,
       assignedTo: selectedUser._id,
       estimatedHours,
-      priority: priority || "medium",
+      priority,
       status: "pending"
     });
 
@@ -116,9 +133,9 @@ export const createTask = async (req, res) => {
 
     return res.status(201).json({
       success: true,
-      message: "Task assigned using greedy algorithm",
+      message: "Task assigned (priority + greedy)",
       assignedTo: selectedUser.name,
-      workload: minWorkload,
+      priority,
       task,
     });
 
@@ -129,8 +146,6 @@ export const createTask = async (req, res) => {
     });
   }
 };
-
-
 
 export const updateProgress = async (req, res) => {
   try {
