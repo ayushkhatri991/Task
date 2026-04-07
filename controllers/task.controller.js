@@ -172,6 +172,9 @@ export const updateProgress = async (req, res) => {
       
       if (status === "completed") {
         task.completedAt = new Date();
+      } else {
+        // If status moved back from completed, clear it
+        task.completedAt = undefined;
       }
     }
 
@@ -214,9 +217,9 @@ export const trackTask = async (req, res) => {
       });
     }
 
-    const now = new Date();
+    const endTime = task.status === "completed" && task.completedAt ? task.completedAt : new Date();
 
-    const elapsedHours = (now - task.startedAt) / (1000 * 60 * 60);
+    const elapsedHours = (endTime - task.startedAt) / (1000 * 60 * 60);
 
     const remainingHours = Math.max(task.estimatedHours - elapsedHours, 0);
 

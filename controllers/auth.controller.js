@@ -149,7 +149,7 @@ auth.forgotPassword = async(req,res) =>{
   console.log(existsEmail.passwordTokenExpiry)
   await existsEmail.save();
 
-  const link = `${process.env.BASE_URL}/auth/change-password/${token}`;
+  const link = `${token}`;
   const transporter = nodemailer.createTransport({
       service: "gmail",
       auth:{
@@ -161,7 +161,7 @@ auth.forgotPassword = async(req,res) =>{
       from:process.env.EMAIL,
       to:existsEmail.email,
       subject:"Reset Password",
-      text:`Please click on the link to reset your password : ${link}`
+      text:`Please  follow this link to reset your password : ${link}`
   })
   return res.status(201).json({
       success:true,

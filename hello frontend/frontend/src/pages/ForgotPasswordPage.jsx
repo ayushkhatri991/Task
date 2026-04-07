@@ -34,9 +34,14 @@ export default function ForgotPasswordPage() {
         <p className="auth-subtitle">Enter your email and we&apos;ll send you a reset link</p>
 
         {sent ? (
-          <div className="alert alert-success" style={{ marginTop: "1rem" }}>
-            ✅ Check your inbox! A password reset link has been sent to <strong>{email}</strong>.
-          </div>
+          <>
+            <div className="alert alert-success" style={{ marginTop: "1rem" }}>
+              ✅ Check your inbox! A password reset link has been sent to <strong>{email}</strong>.
+            </div>
+            <div className="auth-link" style={{ marginTop: "1.5rem" }}>
+              Already have a reset token? <Link to="/auth/change-password">Enter it manually here</Link>
+            </div>
+          </>
         ) : (
           <form onSubmit={handleSubmit}>
             <div className="form-group">

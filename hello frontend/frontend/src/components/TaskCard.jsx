@@ -103,7 +103,7 @@ export default function TaskCard({ task, onRefresh, showUpdate = true }) {
           <div className="track-info-grid">
             <div className="track-info-item">
               <div className="track-info-value">{tracking.elapsedHours}h</div>
-              <div className="track-info-label">Elapsed</div>
+              <div className="track-info-label">{task.status === "completed" ? "Total Time" : "Elapsed"}</div>
             </div>
             <div className="track-info-item">
               <div className="track-info-value">{tracking.remainingHours}h</div>
@@ -111,10 +111,13 @@ export default function TaskCard({ task, onRefresh, showUpdate = true }) {
             </div>
             <div className="track-info-item">
               <div className="track-info-value" style={{ color: "var(--emerald)" }}>{tracking.progress}</div>
-              <div className="track-info-label">Progress</div>
+              <div className="track-info-label">{task.status === "completed" ? "Final Progress" : "Progress"}</div>
             </div>
           </div>
-          <ProgressBar percent={parseFloat(tracking.progress)} label="Completion" />
+          <ProgressBar 
+            percent={task.status === "completed" ? 100 : parseFloat(tracking.progress)} 
+            label={task.status === "completed" ? "Status: Completed" : "Completion"} 
+          />
         </div>
       )}
     </div>

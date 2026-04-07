@@ -41,7 +41,7 @@ export default function App() {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-      <Route path="/auth/change-password/:token" element={<ChangePasswordPage />} />
+      <Route path="/auth/change-password/:token?" element={<ChangePasswordPage />} />
 
       {/* Admin */}
       <Route path="/admin/dashboard" element={<ProtectedRoute role="admin"><AdminDashboardPage /></ProtectedRoute>} />

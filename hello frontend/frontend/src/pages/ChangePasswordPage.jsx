@@ -6,6 +6,7 @@ import toast from "react-hot-toast";
 export default function ChangePasswordPage() {
   const { token } = useParams();
   const navigate = useNavigate();
+  const [manualToken, setManualToken] = useState("");
   const [form, setForm] = useState({ newPassword: "", confirmPassword: "" });
   const [loading, setLoading] = useState(false);
 
@@ -17,7 +18,13 @@ export default function ChangePasswordPage() {
     }
     setLoading(true);
     try {
-      await changePassword(token, form);
+      const activeToken = token || manualToken;
+      if (!activeToken) {
+        toast.error("Please provide a reset token");
+        setLoading(false);
+        return;
+      }
+      await changePassword(activeToken, form);
       toast.success("Password changed successfully! 🔐");
       navigate("/login");
     } catch (err) {
@@ -39,6 +46,20 @@ export default function ChangePasswordPage() {
         <p className="auth-subtitle">Enter your new password below</p>
 
         <form onSubmit={handleSubmit}>
+          {!token && (
+            <div className="form-group">
+              <label className="form-label">Reset Token</label>
+              <input 
+                id="reset-token" 
+                className="form-input" 
+                type="text" 
+                placeholder="Paste the token from your email"
+                value={manualToken} 
+                onChange={(e) => setManualToken(e.target.value)} 
+                required 
+              />
+            </div>
+          )}
           <div className="form-group">
             <label className="form-label">New Password</label>
             <input id="new-password" className="form-input" type="password" placeholder="Min 6 characters"
