@@ -34,6 +34,11 @@ const taskSchema = new mongoose.Schema({
   //  When task completed
   completedAt: {
     type: Date
+  },
+
+  skills: {
+    type: [String],
+    default: []
   }
 
 

@@ -1,15 +1,22 @@
 import { useEffect, useState } from "react";
-import { getPriorityQueue } from "../api/tasks";
+import { getPriorityQueue, deleteTask } from "../api/tasks";
 import Sidebar from "../components/Sidebar";
 import Navbar from "../components/Navbar";
 import PriorityBadge from "../components/PriorityBadge";
+import ConfirmModal from "../components/ConfirmModal";
+import { useAuth } from "../context/AuthContext";
+import toast from "react-hot-toast";
 
 export default function PriorityQueuePage() {
+  const { user } = useAuth();
   const [queue, setQueue] = useState([]);
   const [loading, setLoading] = useState(true);
   const [total, setTotal] = useState(0);
+  const [targetTask, setTargetTask] = useState(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
-  useEffect(() => {
+  const fetchQueue = () => {
+    setLoading(true);
     getPriorityQueue()
       .then((res) => {
         setQueue(res.data.queue || []);
@@ -17,7 +24,26 @@ export default function PriorityQueuePage() {
       })
       .catch(() => setQueue([]))
       .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    fetchQueue();
   }, []);
+
+  const handleDelete = async () => {
+    if (!targetTask) return;
+    setDeleteLoading(true);
+    try {
+      await deleteTask(targetTask._id);
+      toast.success("Task deleted successfully");
+      fetchQueue();
+      setTargetTask(null);
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to delete task");
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
 
   const rankIcon = (i) => {
     if (i === 0) return "🥇";
@@ -80,6 +106,16 @@ export default function PriorityQueuePage() {
                   <div className="queue-meta">
                     <PriorityBadge priority={task.priority} />
                     <span className={`badge badge-${task.status}`}>{task.status}</span>
+                    {user?.role === "admin" && (
+                      <button 
+                        className="btn btn-sm" 
+                        onClick={() => setTargetTask(task)}
+                        style={{ padding: "0.4rem", minWidth: "auto", background: "rgba(239, 68, 68, 0.1)", color: "#ef4444", border: "1px solid rgba(239, 68, 68, 0.2)", marginLeft: "0.5rem" }}
+                        title="Delete Task"
+                      >
+                        🗑️
+                      </button>
+                    )}
                   </div>
                 </div>
               ))}
@@ -87,6 +123,15 @@ export default function PriorityQueuePage() {
           )}
         </div>
       </div>
+
+      <ConfirmModal 
+        isOpen={!!targetTask}
+        onClose={() => setTargetTask(null)}
+        onConfirm={handleDelete}
+        loading={deleteLoading}
+        title="Confirm Deletion"
+        message={`Are you sure you want to delete "${targetTask?.title}"? This action cannot be undone.`}
+      />
     </div>
   );
 }

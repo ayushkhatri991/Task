@@ -8,9 +8,9 @@ const auth = {}
 
 auth.register = async(req,res) =>{
     try {
-        const {name, email, password} = await req.body;
+        const {name, email, password, skills} = await req.body;
         
-        if ( !name || !email || !password) {
+        if ( !name || !email || !password || !skills) {
           return res.status(400).json({
             success: false,
             message: "All fields are required",
@@ -31,6 +31,7 @@ auth.register = async(req,res) =>{
           name,
           email,
           password: hashedPassword,
+          skills
         });
 
         return res.status(201).json({

@@ -6,7 +6,6 @@ const PRIORITY_WEIGHT = { high: 3, medium: 2, low: 1 };
 
 export const getPriorityQueue = async (req, res) => {
   try {
-    // Get all pending and in-progress tasks
     const tasks = await Task.find({
       status: { $in: ["pending", "in-progress"] }
     }).populate("assignedTo", "name email");
@@ -18,7 +17,7 @@ export const getPriorityQueue = async (req, res) => {
       });
     }
 
-    // Sort by priority weight (high -> medium -> low)
+   
     const queue = tasks.sort((a, b) => 
       PRIORITY_WEIGHT[b.priority] - PRIORITY_WEIGHT[a.priority]
     );
@@ -62,12 +61,12 @@ export const getAllTasks = async (req, res) => {
 };
 export const createTask = async (req, res) => {
   try {
-    const { title, description, estimatedHours, priority } = req.body;
+    const { title, description, estimatedHours, priority, skills } = req.body;
 
-    if (!title || !description || !estimatedHours) {
+    if (!title || !description || !estimatedHours || !priority || !skills) {
       return res.status(400).json({
         success: false,
-        message: "Title, description and estimatedHours are required",
+        message: "Title,description,skills,priority and estimatedHours are required",
       });
     }
 
@@ -81,52 +80,84 @@ export const createTask = async (req, res) => {
       });
     }
 
-    let selectedUser = null;
-    let minWorkload = Infinity;
-
-    //  If HIGH priority → assign to FREE user first
-    if (priority === "high") {
-      for (let user of users) {
-        const existingTask = await Task.findOne({
-          assignedTo: user._id,
-          status: { $in: ["pending", "in-progress"] }
+    // users based on similar skills 
+    let eligibleUsers = [...users];
+    if (skills && skills.length > 0) {
+      const matchingUsers = users.filter((u) =>
+        skills.every((skill) => u.skills.includes(skill))
+      );
+      
+      if (matchingUsers.length > 0) {
+        eligibleUsers = matchingUsers;
+      } else {
+        return res.status(400).json({
+          success: false,
+          message: "No users found with all required skills",
         });
-
-        if (!existingTask) {
-          selectedUser = user;
-          break;
-        }
       }
     }
 
-    // If no free user OR not high priority → GREEDY
-    if (!selectedUser) {
-      for (let user of users) {
-        const tasks = await Task.find({
-          assignedTo: user._id,
-          status: { $in: ["pending", "in-progress"] }
-        });
+let selectedUser = null;
+let minWorkload = Infinity;
 
-        const workload = tasks.reduce(
-          (sum, task) => sum + task.estimatedHours,
-          0
-        );
+//High and medium priority logic
+if (priority === "high" || priority === "medium") {
+  for (let user of eligibleUsers) {
+    const existingTask = await Task.findOne({
+      assignedTo: user._id,
+      status: "in-progress"
+    });
 
-        if (workload < minWorkload) {
-          minWorkload = workload;
-          selectedUser = user;
-        }
-      }
+    // Pick immediately if no active task
+    if (!existingTask) {
+      selectedUser = user;
+      break;
     }
+  }
+}
 
-    // Step 4: Create task
+// If no free user OR not high or medium priority → use workload
+if (!selectedUser) {
+  const now = new Date();
+
+  for (let user of eligibleUsers) {
+    const tasks = await Task.find({
+      assignedTo: user._id,
+      status: { $in: ["pending", "in-progress"] }
+    });
+
+const workload = tasks.reduce((sum, task) => {
+  let remaining = Number(task.estimatedHours) || 0;
+
+  if (task.status === "in-progress" && task.startedAt) {
+    const start = new Date(task.startedAt).getTime();
+    const nowTime = now.getTime();
+
+    if (!isNaN(start) && nowTime > start) {
+      const elapsed = (nowTime - start) / (1000 * 60 * 60);
+      remaining = Math.max(remaining - elapsed, 0);
+    }
+  }
+
+  return sum + remaining;
+}, 0);
+
+    if (workload < minWorkload) {
+      minWorkload = workload;
+      selectedUser = user;
+    }
+  }
+}
+
+    // Create task
     const task = await Task.create({
       title,
       description,
       assignedTo: selectedUser._id,
       estimatedHours,
       priority,
-      status: "pending"
+      status: "pending",
+      skills: skills || []
     });
 
     await task.populate("assignedTo", "name email");
@@ -239,6 +270,31 @@ export const trackTask = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: error.message
+    });
+  }
+};
+export const deleteTask = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const task = await Task.findById(id);
+
+    if (!task) {
+      return res.status(404).json({
+        success: false,
+        message: "Task not found",
+      });
+    }
+
+    await Task.findByIdAndDelete(id);
+
+    return res.status(200).json({
+      success: true,
+      message: "Task deleted successfully",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Something went wrong",
     });
   }
 };

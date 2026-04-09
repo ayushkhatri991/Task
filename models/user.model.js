@@ -22,7 +22,10 @@ role:{
     enum: ["admin", "employee"],
     default: "employee",
 },
-
+skills:{
+    type:[String], 
+    default: [],    
+  },
 active: {
     type: Boolean,
     default: false

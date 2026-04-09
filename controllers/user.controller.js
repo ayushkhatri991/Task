@@ -28,11 +28,11 @@ export const getAllUsers = async(req, res) =>{
 
 export const createUser = async (req, res) => {
     try {
-      const { name, email, password, role } =
+      const { name, email, password, role,skills } =
         req.body;
   
   
-      if (!name || !email || !password || !role) {
+      if (!name || !email || !password || !role || !skills) {
         return res.status(400).json({
           success: false,
           message: "All fields are required",
@@ -55,6 +55,7 @@ export const createUser = async (req, res) => {
         email,
         password: hashedPassword,
         role,
+        skills
       });
   
       return res.status(201).json({
@@ -103,11 +104,11 @@ export const getById = async (req, res) => {
 export const updateUser = async(req, res) =>{
     try {
         const {id} = req.params
-        const {name, email, password} = req.body
+        const {name, email, password, skills, role} = req.body
 
-        if(!name || !email || !password){
+        if(!name || !email){
             return res.status(400).json({
-                message:"All fields are required",
+                message:"Name and email are required",
                 success: false,
             })
         }
@@ -121,14 +122,19 @@ export const updateUser = async(req, res) =>{
             })
         }
 
-        const salt = bcrypt.genSaltSync(10)
-        const hashpassword = bcrypt.hashSync(password, salt)
-
-        const updatedUser = await userSchema.findByIdAndUpdate(id,{
+        const updateData = {
             name,
             email,
-            password:hashpassword,
-        }, { new: true, runValidators: true })
+            skills,
+            role: role || user.role
+        }
+
+        if (password && password.trim() !== "") {
+            const salt = bcrypt.genSaltSync(10)
+            updateData.password = bcrypt.hashSync(password, salt)
+        }
+
+        const updatedUser = await userSchema.findByIdAndUpdate(id, updateData, { new: true, runValidators: true })
 
         return res.status(200).json({
             message:"User Updated Successfully",

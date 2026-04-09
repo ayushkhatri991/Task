@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { trackTask, updateTaskStatus } from "../api/tasks";
+import { trackTask, updateTaskStatus, deleteTask } from "../api/tasks";
 import ProgressBar from "./ProgressBar";
 import PriorityBadge from "./PriorityBadge";
+import ConfirmModal from "./ConfirmModal";
 import toast from "react-hot-toast";
 import { useAuth } from "../context/AuthContext";
 
@@ -12,6 +13,8 @@ export default function TaskCard({ task, onRefresh, showUpdate = true }) {
   const [tracking, setTracking] = useState(null);
   const [trackLoading, setTrackLoading] = useState(false);
   const [statusLoading, setStatusLoading] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   // Only allow updating if showUpdate is true AND the user is an employee
   const canUpdate = showUpdate && user?.role === "employee";
@@ -42,6 +45,20 @@ export default function TaskCard({ task, onRefresh, showUpdate = true }) {
     }
   };
 
+  const handleDelete = async () => {
+    setDeleteLoading(true);
+    try {
+      await deleteTask(task._id);
+      toast.success("Task deleted successfully");
+      onRefresh?.();
+      setShowConfirm(false);
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to delete task");
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
   return (
     <div className="task-card">
       <div className="task-card-header">
@@ -51,7 +68,20 @@ export default function TaskCard({ task, onRefresh, showUpdate = true }) {
             <div className="task-card-assignee">👤 {task.assignedTo.name || task.assignedTo.email || "Assigned"}</div>
           )}
         </div>
-        <PriorityBadge priority={task.priority} />
+        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+          {user?.role === "admin" && (
+            <button 
+              className="btn btn-sm" 
+              onClick={() => setShowConfirm(true)}
+              disabled={deleteLoading}
+              style={{ padding: "0.4rem", minWidth: "auto", background: "rgba(239, 68, 68, 0.1)", color: "#ef4444", border: "1px solid rgba(239, 68, 68, 0.2)" }}
+              title="Delete Task"
+            >
+              🗑️
+            </button>
+          )}
+          <PriorityBadge priority={task.priority} />
+        </div>
       </div>
 
       <p className="task-card-desc">{task.description}</p>
@@ -120,6 +150,15 @@ export default function TaskCard({ task, onRefresh, showUpdate = true }) {
           />
         </div>
       )}
+
+      <ConfirmModal 
+        isOpen={showConfirm}
+        onClose={() => setShowConfirm(false)}
+        onConfirm={handleDelete}
+        loading={deleteLoading}
+        title="Confirm Deletion"
+        message={`Are you sure you want to delete "${task.title}"? This action cannot be undone.`}
+      />
     </div>
   );
 }

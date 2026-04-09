@@ -1,6 +1,6 @@
 
 import express from "express";
-import { createTask, trackTask, updateProgress, getAllTasks, getPriorityQueue } from "../controllers/task.controller.js";
+import { createTask, trackTask, updateProgress, getAllTasks, getPriorityQueue, deleteTask } from "../controllers/task.controller.js";
 import { authRole } from "../middlewares/authRole.js";
 import authorization from "../middlewares/auth.middleware.js";
 const router = express.Router()
@@ -240,6 +240,38 @@ router.put(
     "/:id",
     authorization,
     updateProgress
+);
+
+/**
+ * @swagger
+ * /task/{id}:
+ *   delete:
+ *     summary: Delete a task
+ *     tags: [Task]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: 507f1f77bcf86cd799439011
+ *     responses:
+ *       200:
+ *         description: Task deleted successfully
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden (Admin only)
+ *       404:
+ *         description: Task not found
+ */
+router.delete(
+    "/:id",
+    authorization,
+    authRole("admin"),
+    deleteTask
 );
 
 export default router;

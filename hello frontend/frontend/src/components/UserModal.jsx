@@ -8,6 +8,7 @@ export default function UserModal({ onClose, onSuccess, editUser }) {
     email: editUser?.email || "",
     password: "",
     role: editUser?.role || "employee",
+    skills: editUser?.skills?.join(", ") || "",
   });
   const [loading, setLoading] = useState(false);
   const isEdit = !!editUser;
@@ -16,11 +17,17 @@ export default function UserModal({ onClose, onSuccess, editUser }) {
     e.preventDefault();
     setLoading(true);
     try {
+      const skillsArray = typeof form.skills === "string" 
+        ? form.skills.split(",").map(s => s.trim()).filter(s => s !== "")
+        : form.skills;
+
+      const userData = { ...form, skills: skillsArray };
+
       if (isEdit) {
-        await updateUser(editUser._id, form);
+        await updateUser(editUser._id, userData);
         toast.success("User updated successfully ✅");
       } else {
-        await createUser(form);
+        await createUser(userData);
         toast.success("User created successfully 🎉");
       }
       onSuccess?.();
@@ -53,12 +60,14 @@ export default function UserModal({ onClose, onSuccess, editUser }) {
               value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required />
           </div>
 
-          <div className="form-group">
-            <label className="form-label">{isEdit ? "New Password (optional)" : "Password"}</label>
-            <input className="form-input" type="password" placeholder={isEdit ? "Leave blank to keep current" : "Min 6 characters"}
-              value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })}
-              required={!isEdit} />
-          </div>
+          {!isEdit && (
+            <div className="form-group">
+              <label className="form-label">Password</label>
+              <input className="form-input" type="password" placeholder="Min 6 characters"
+                value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })}
+                required />
+            </div>
+          )}
 
           <div className="form-group">
             <label className="form-label">Role</label>
@@ -66,6 +75,12 @@ export default function UserModal({ onClose, onSuccess, editUser }) {
               <option value="employee">Employee</option>
               <option value="admin">Admin</option>
             </select>
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">Skills (comma separated)</label>
+            <input className="form-input" placeholder="e.g. React, Node, CSS"
+              value={form.skills} onChange={(e) => setForm({ ...form, skills: e.target.value })} />
           </div>
 
           <div className="modal-actions">

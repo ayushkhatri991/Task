@@ -3,7 +3,7 @@ import { assignTask } from "../api/tasks";
 import toast from "react-hot-toast";
 
 export default function TaskModal({ onClose, onSuccess }) {
-  const [form, setForm] = useState({ title: "", description: "", estimatedHours: "", priority: "medium" });
+  const [form, setForm] = useState({ title: "", description: "", estimatedHours: "", priority: "medium", skills: "" });
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
@@ -14,7 +14,12 @@ export default function TaskModal({ onClose, onSuccess }) {
     }
     setLoading(true);
     try {
-      const res = await assignTask({ ...form, estimatedHours: Number(form.estimatedHours) });
+      const skillsArray = form.skills.split(",").map(s => s.trim()).filter(s => s !== "");
+      const res = await assignTask({ 
+        ...form, 
+        estimatedHours: Number(form.estimatedHours),
+        skills: skillsArray
+      });
       toast.success(`Task assigned to ${res.data.assignedTo} 🎯`);
       onSuccess?.();
       onClose();
@@ -48,6 +53,12 @@ export default function TaskModal({ onClose, onSuccess }) {
             <label className="form-label">Description</label>
             <textarea className="form-textarea" placeholder="Describe the task..."
               value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">Required Skills (comma separated)</label>
+            <input className="form-input" placeholder="e.g. React, Node, CSS"
+              value={form.skills} onChange={(e) => setForm({ ...form, skills: e.target.value })} />
           </div>
 
           <div className="grid-2">

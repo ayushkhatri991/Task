@@ -4,7 +4,7 @@ import { register as apiRegister } from "../api/auth";
 import toast from "react-hot-toast";
 
 export default function RegisterPage() {
-  const [form, setForm] = useState({ name: "", email: "", password: "" });
+  const [form, setForm] = useState({ name: "", email: "", password: "", skills: "" });
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -12,7 +12,8 @@ export default function RegisterPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      await apiRegister(form);
+      const skillsArray = form.skills.split(",").map(s => s.trim()).filter(s => s !== "");
+      await apiRegister({ ...form, skills: skillsArray });
       toast.success("Account created! Please log in. 🎉");
       navigate("/login");
     } catch (err) {
@@ -50,6 +51,12 @@ export default function RegisterPage() {
             <label className="form-label">Password</label>
             <input id="reg-password" className="form-input" type="password" placeholder="Min 6 characters"
               value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} required />
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">Skills (comma separated)</label>
+            <input id="reg-skills" className="form-input" placeholder="e.g. React, Node, CSS"
+              value={form.skills} onChange={(e) => setForm({ ...form, skills: e.target.value })} required />
           </div>
 
           <button type="submit" className="btn btn-primary btn-full" disabled={loading}>
