@@ -36,7 +36,7 @@ swaggerDefinition:{
         version:"1.0.0",
         description:"The Backend API documentation"
     },
-    servers:[{url:"http://localhost:3000"}],
+    servers:[{url:"http://localhost:4001"}],
     components: {
         securitySchemes: {
             bearerAuth: {

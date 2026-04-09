@@ -24,6 +24,7 @@ const router = express.Router()
  *               - email
  *               - password
  *               - role
+ *               - skills
  *             properties:
  *               name:
  *                 type: string
@@ -38,6 +39,11 @@ const router = express.Router()
  *                 type: string
  *                 enum: [admin, employee]
  *                 example: employee
+ *               skills:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 example: ["React", "Node.js", "MongoDB"]
  *     responses:
  *       201:
  *         description: User created successfully
@@ -148,7 +154,6 @@ router.get("/:id",getById)
  *             required:
  *               - name
  *               - email
- *               - password
  *             properties:
  *               name:
  *                 type: string
@@ -159,11 +164,20 @@ router.get("/:id",getById)
  *               password:
  *                 type: string
  *                 example: newPassword123
+ *               role:
+ *                 type: string
+ *                 enum: [admin, employee]
+ *                 example: employee
+ *               skills:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 example: ["React", "Node.js"]
  *     responses:
  *       200:
  *         description: User updated successfully
  *       400:
- *         description: All fields are required
+ *         description: Name and email are required
  *       401:
  *         description: Unauthorized
  *       404:
