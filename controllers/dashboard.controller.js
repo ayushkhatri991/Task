@@ -1,7 +1,51 @@
 import Task from "../models/task.model.js"
 import User from "../models/user.model.js"
 
-export const adminStats = async(req,res)=>{
+
+export const getUserTaskStats = async (req, res) => {
+  try {
+    const stats = await User.aggregate([
+      { $match: { role: "employee" } },
+      {
+        $lookup: {
+          from: "tasks",
+          localField: "_id",
+          foreignField: "assignedTo",
+          as: "tasks"
+        }
+      },
+      {
+        $project: {
+          name: 1,
+          email: 1,
+          role: 1,
+          totalAssigned: { $size: "$tasks" },
+          totalCompleted: {
+            $size: {
+              $filter: {
+                input: "$tasks",
+                as: "task",
+                cond: { $eq: ["$$task.status", "completed"] }
+              }
+            }
+          }
+        }
+      }
+    ]);
+
+    return res.status(200).json({
+      success: true,
+      message: "User task stats fetched successfully",
+      stats
+    });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: err.message || "Something went wrong"
+    });
+  }
+};
+export const adminStats = async (req,res) => {
 try{
   const totalTasks = await Task.countDocuments()
 

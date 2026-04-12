@@ -111,6 +111,7 @@ body {
   font-weight: 700;
   background: var(--gradient-main);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
@@ -185,7 +186,7 @@ body {
 }
 
 .sidebar-user-info { flex: 1; min-width: 0; }
-.sidebar-user-name { font-size: 0.8rem; font-weight: 600; truncate: ellipsis; white-space: nowrap; overflow: hidden; }
+.sidebar-user-name { font-size: 0.8rem; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; }
 .sidebar-user-role { font-size: 0.7rem; color: var(--text-muted); text-transform: capitalize; }
 
 .sidebar-logout-btn {
@@ -304,6 +305,7 @@ body {
   font-weight: 800;
   background: var(--gradient-main);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
@@ -772,11 +774,3 @@ tr:hover td { background: rgba(255,255,255,0.02); }
 .alert-success { background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.2); color: #34d399; }
 .alert-warning { background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.2); color: #fbbf24; }
 .alert-error { background: rgba(244,63,94,0.1); border: 1px solid rgba(244,63,94,0.2); color: #fb7185; }
-
-/* ─── Recharts overrides ─── */
-.recharts-cartesian-axis-tick-value { fill: var(--text-muted); font-size: 0.75rem; }
-.recharts-tooltip-wrapper .recharts-default-tooltip {
-  background: var(--bg-secondary) !important;
-  border: 1px solid var(--border) !important;
-  border-radius: var(--radius-sm) !important;
-}

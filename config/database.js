@@ -3,7 +3,6 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-// mongoose url from .env file
 const Url = process.env.MONGO_URL
 
 const connectionDB = async () => {

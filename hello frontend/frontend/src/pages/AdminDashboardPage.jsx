@@ -1,26 +1,23 @@
 import { useEffect, useState } from "react";
-import { getAdminStats } from "../api/dashboard";
+import { getAdminStats, getUserTaskStats } from "../api/dashboard";
 import Sidebar from "../components/Sidebar";
 import Navbar from "../components/Navbar";
 import StatCard from "../components/StatCard";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
 
 export default function AdminDashboardPage() {
   const [stats, setStats] = useState(null);
+  const [userStats, setUserStats] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getAdminStats()
-      .then((res) => setStats(res.data))
+    Promise.all([getAdminStats(), getUserTaskStats()])
+      .then(([adminRes, userRes]) => {
+        setStats(adminRes.data);
+        setUserStats(userRes.data.stats || []);
+      })
       .catch(console.error)
       .finally(() => setLoading(false));
   }, []);
-
-  const chartData = stats ? [
-    { name: "Pending", value: stats.pending, color: "#fbbf24" },
-    { name: "In Progress", value: stats.inProgress, color: "#06b6d4" },
-    { name: "Completed", value: stats.completed, color: "#10b981" },
-  ] : [];
 
   return (
     <div className="app-layout">
@@ -48,38 +45,71 @@ export default function AdminDashboardPage() {
               </div>
 
               <div className="card" style={{ marginTop: "2rem" }}>
-                <div className="section-title">📈 Task Distribution</div>
-                <ResponsiveContainer width="100%" height={220}>
-                  <BarChart data={chartData} margin={{ top: 10, right: 20, left: -10, bottom: 0 }} barSize={40}>
-                    <XAxis dataKey="name" axisLine={false} tickLine={false} />
-                    <YAxis allowDecimals={false} axisLine={false} tickLine={false} />
-                    <Tooltip
-                      contentStyle={{ background: "var(--bg-secondary)", border: "1px solid var(--border)", borderRadius: "8px", color: "var(--text-primary)" }}
-                      cursor={{ fill: "rgba(255,255,255,0.04)" }}
-                    />
-                    <Bar dataKey="value" radius={[6, 6, 0, 0]}>
-                      {chartData.map((entry, i) => (
-                        <Cell key={i} fill={entry.color} />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
+                <div className="section-title">👥 Employee Performance Overview</div>
+                <div className="table-wrapper">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Employee</th>
+                        <th>Assigned Tasks</th>
+                        <th>Completed Tasks</th>
+                        <th>Success Rate</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {userStats.length === 0 ? (
+                        <tr>
+                          <td colSpan={4} style={{ textAlign: "center", padding: "2rem", color: "var(--text-muted)" }}>
+                            No employee stats available
+                          </td>
+                        </tr>
+                      ) : userStats.map((u) => {
+                        const percentage = u.totalAssigned > 0 
+                          ? Math.round((u.totalCompleted / u.totalAssigned) * 100) 
+                          : 0;
+                        
+                        return (
+                          <tr key={u._id || u.email}>
+                            <td>
+                              <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
+                                <div className="sidebar-user-avatar" style={{ width: 30, height: 30, fontSize: "0.75rem" }}>
+                                  {u.name?.charAt(0).toUpperCase()}
+                                </div>
+                                <div style={{ display: "flex", flexDirection: "column" }}>
+                                  <span style={{ fontWeight: 500 }}>{u.name}</span>
+                                  <span style={{ fontSize: "0.7rem", color: "var(--text-muted)" }}>{u.email}</span>
+                                </div>
+                              </div>
+                            </td>
+                            <td>
+                              <span className="badge badge-pending">{u.totalAssigned}</span>
+                            </td>
+                            <td>
+                              <span className="badge badge-completed">{u.totalCompleted}</span>
+                            </td>
+                            <td>
+                              <div style={{ display: "flex", alignItems: "center", gap: "0.8rem" }}>
+                                <div style={{ flex: 1, height: "6px", background: "var(--bg-secondary)", borderRadius: "10px", overflow: "hidden" }}>
+                                  <div style={{ 
+                                    width: `${percentage}%`, 
+                                    height: "100%", 
+                                    background: percentage > 70 ? "var(--emerald)" : percentage > 30 ? "var(--amber)" : "var(--rose)",
+                                    transition: "width 0.5s ease"
+                                  }} />
+                                </div>
+                                <span style={{ fontSize: "0.85rem", fontWeight: 600, minWidth: "60px" }}>
+                                  {percentage}% <span style={{ color: "var(--text-muted)", fontWeight: 400 }}>({u.totalCompleted}/{u.totalAssigned})</span>
+                                </span>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
               </div>
 
-              <div className="grid-2" style={{ marginTop: "1.5rem" }}>
-                <div className="card card-glass">
-                  <div className="section-title">🤖 Smart Assignment</div>
-                  <p style={{ fontSize: "0.875rem", color: "var(--text-secondary)", lineHeight: "1.7" }}>
-                    <strong style={{ color: "var(--purple-light)" }}>High priority</strong> tasks prioritize completely free employees. Otherwise, tasks are assigned to the least busy active employee by summing pending + in-progress estimated hours per user.
-                  </p>
-                </div>
-                <div className="card card-glass">
-                  <div className="section-title">🔢 Priority Queue</div>
-                  <p style={{ fontSize: "0.875rem", color: "var(--text-secondary)", lineHeight: "1.7" }}>
-                    All active tasks are sorted by <strong style={{ color: "var(--cyan)" }}>priority weight</strong> — High (3) → Medium (2) → Low (1) — so critical work is always handled first.
-                  </p>
-                </div>
-              </div>
             </>
           )}
         </div>
