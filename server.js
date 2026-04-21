@@ -7,13 +7,41 @@ import authRouter from "./routes/auth.routes.js"
 import userRouter from "./routes/user.routes.js"
 import taskRouter from "./routes/task.routes.js"
 import dashRouter from "./routes/dash.routes.js"
+import notificationRouter from "./routes/notification.routes.js"
+import { createServer } from "http";
+import { Server } from "socket.io";
 dotenv.config();
 
 //swagger 
 import swaggerJSDoc from "swagger-jsdoc"
 import swaggerUi from "swagger-ui-express";
 
-const app = express()
+const app = express();
+const server = createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: "*", 
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"]
+  }
+});
+
+io.on("connection", (socket) => {
+  console.log("Socket connected:", socket.id);
+  
+  socket.on("join", (userId) => {
+    socket.join(userId);
+    console.log(`User ${userId} joined their room.`);
+  });
+
+  socket.on("disconnect", () => {
+    console.log("Socket disconnected:", socket.id);
+  });
+});
+
+app.use((req, res, next) => {
+  req.io = io;
+  next();
+});
 
 const PORT = process.env.PORT || 4001;
 connectionDB();
@@ -60,10 +88,11 @@ app.use("/auth",authRouter)
 app.use("/users",userRouter)
 app.use("/task",taskRouter)
 app.use("/dashboard", dashRouter)
+app.use("/notifications", notificationRouter)
 
 
 
 
-app.listen(PORT,()=>{
+server.listen(PORT,()=>{
     console.log(`Server is running on http://localhost:${PORT}`)
 })

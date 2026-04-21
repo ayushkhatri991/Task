@@ -1,5 +1,6 @@
 import Task from "../models/task.model.js";
 import User from "../models/user.model.js";
+import Notification from "../models/notification.model.js";
 
 // Priority weights for sorting
 const PRIORITY_WEIGHT = { high: 3, medium: 2, low: 1 };
@@ -161,6 +162,22 @@ const workload = tasks.reduce((sum, task) => {
     });
 
     await task.populate("assignedTo", "name email");
+
+    // Add Notification
+    const notificationMessage = `You have a new ${priority} priority task: ${title}`;
+    await Notification.create({
+      userId: selectedUser._id,
+      message: notificationMessage,
+      taskId: task._id
+    });
+
+    // Fire Socket.io event
+    if (req.io) {
+      req.io.to(selectedUser._id.toString()).emit("newTask", {
+        message: notificationMessage,
+        task: task
+      });
+    }
 
     return res.status(201).json({
       success: true,
