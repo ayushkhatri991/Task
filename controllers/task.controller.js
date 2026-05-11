@@ -73,14 +73,9 @@ export const createTask = async (req, res) => {
     }
 
     // Get active employees
-    const users = await User.find({ role: "employee", active: true });
+    const users = await User.find({ role: "employee" });
 
-    if (!users.length) {
-      return res.status(400).json({
-        success: false,
-        message: "No active users available",
-      });
-    }
+  
 
     // users based on similar skills 
     let eligibleUsers = [...users];
