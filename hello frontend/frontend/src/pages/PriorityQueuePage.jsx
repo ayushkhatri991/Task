@@ -62,7 +62,7 @@ export default function PriorityQueuePage() {
           <div className="page-header">
             <div>
               <h1 className="page-title"><ListOrdered style={{ marginRight: '8px' }} /> Priority Queue</h1>
-              <p className="page-subtitle">Active tasks sorted by priority weight — High (3) → Medium (2) → Low (1)</p>
+              <p className="page-subtitle">Active tasks sorted by priority level</p>
             </div>
             <div className="card" style={{ padding: "0.75rem 1.25rem", display: "flex", alignItems: "center", gap: "0.5rem" }}>
               <span style={{ fontSize: "1.5rem", fontWeight: 800, color: "var(--purple-light)" }}>{total}</span>
@@ -70,19 +70,7 @@ export default function PriorityQueuePage() {
             </div>
           </div>
 
-          {/* Legend */}
-          <div style={{ display: "flex", gap: "0.75rem", marginBottom: "1.5rem", flexWrap: "wrap" }}>
-            {[
-              { label: "High Priority", weight: 3, cls: "badge-high" },
-              { label: "Medium Priority", weight: 2, cls: "badge-medium" },
-              { label: "Low Priority", weight: 1, cls: "badge-low" },
-            ].map((item) => (
-              <div key={item.label} className="card" style={{ padding: "0.5rem 1rem", display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                <span className={`badge ${item.cls}`}>{item.label}</span>
-                <span style={{ fontSize: "0.78rem", color: "var(--text-muted)" }}>weight = {item.weight}</span>
-              </div>
-            ))}
-          </div>
+
 
           {loading ? (
             <div className="spinner-page"><div className="spinner" /><span>Loading queue...</span></div>

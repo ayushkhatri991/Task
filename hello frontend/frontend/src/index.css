@@ -31,7 +31,7 @@
   --gradient-card: linear-gradient(135deg, rgba(124, 58, 237, 0.08), rgba(8, 145, 178, 0.04));
   --gradient-purple: linear-gradient(135deg, #6d28d9, #7c3aed);
   --gradient-success: linear-gradient(135deg, #047857, #059669);
-  --gradient-danger: linear-gradient(135deg, #be123c, #e11d48);
+  --gradient-danger: linear-gradient(135deg, #ff6b6b, #f06292);
   --gradient-amber: linear-gradient(135deg, #b45309, #d97706);
 
   --shadow-glow: 0 0 30px rgba(124, 58, 237, 0.1);
@@ -417,7 +417,7 @@ body {
   color: #fff;
 }
 
-.btn-danger:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(244, 63, 94, 0.4); }
+.btn-danger:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4); }
 
 .btn-success {
   background: var(--gradient-success);
