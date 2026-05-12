@@ -6,6 +6,7 @@ import PriorityBadge from "../components/PriorityBadge";
 import ConfirmModal from "../components/ConfirmModal";
 import { useAuth } from "../context/AuthContext";
 import toast from "react-hot-toast";
+import { Award, ListOrdered, PartyPopper, User, Clock, Trash2 } from "lucide-react";
 
 export default function PriorityQueuePage() {
   const { user } = useAuth();
@@ -46,9 +47,9 @@ export default function PriorityQueuePage() {
   };
 
   const rankIcon = (i) => {
-    if (i === 0) return "🥇";
-    if (i === 1) return "🥈";
-    if (i === 2) return "🥉";
+    if (i === 0) return <Award color="#fbbf24" size={20} />;
+    if (i === 1) return <Award color="#94a3b8" size={20} />;
+    if (i === 2) return <Award color="#b45309" size={20} />;
     return `#${i + 1}`;
   };
 
@@ -60,7 +61,7 @@ export default function PriorityQueuePage() {
         <div className="page">
           <div className="page-header">
             <div>
-              <h1 className="page-title">🔢 Priority Queue</h1>
+              <h1 className="page-title"><ListOrdered style={{ marginRight: '8px' }} /> Priority Queue</h1>
               <p className="page-subtitle">Active tasks sorted by priority weight — High (3) → Medium (2) → Low (1)</p>
             </div>
             <div className="card" style={{ padding: "0.75rem 1.25rem", display: "flex", alignItems: "center", gap: "0.5rem" }}>
@@ -87,7 +88,7 @@ export default function PriorityQueuePage() {
             <div className="spinner-page"><div className="spinner" /><span>Loading queue...</span></div>
           ) : queue.length === 0 ? (
             <div className="empty-state">
-              <div className="empty-state-icon">🎉</div>
+              <div className="empty-state-icon"><PartyPopper size={48} /></div>
               <h3>Queue is empty</h3>
               <p>No pending or in-progress tasks</p>
             </div>
@@ -99,8 +100,8 @@ export default function PriorityQueuePage() {
                   <div className="queue-info">
                     <div className="queue-title">{task.title}</div>
                     <div className="queue-assigned">
-                      {task.assignedTo ? `👤 ${task.assignedTo.name}` : "Unassigned"}
-                      {" · "}⏱ {task.estimatedHours}h
+                      {task.assignedTo ? <><User size={14} style={{ marginRight: '4px', verticalAlign: 'middle' }} /> {task.assignedTo.name}</> : "Unassigned"}
+                      {" · "}<Clock size={14} style={{ marginRight: '4px', verticalAlign: 'middle' }} /> {task.estimatedHours}h
                     </div>
                   </div>
                   <div className="queue-meta">
@@ -111,9 +112,8 @@ export default function PriorityQueuePage() {
                         className="btn btn-sm" 
                         onClick={() => setTargetTask(task)}
                         style={{ padding: "0.4rem", minWidth: "auto", background: "rgba(239, 68, 68, 0.1)", color: "#ef4444", border: "1px solid rgba(239, 68, 68, 0.2)", marginLeft: "0.5rem" }}
-                        title="Delete Task"
                       >
-                        🗑️
+                        <Trash2 size={16} />
                       </button>
                     )}
                   </div>

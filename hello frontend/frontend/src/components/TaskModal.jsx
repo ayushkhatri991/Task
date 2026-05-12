@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { assignTask } from "../api/tasks";
 import toast from "react-hot-toast";
+import { Zap, Bot, X } from "lucide-react";
 
 export default function TaskModal({ onClose, onSuccess }) {
   const [form, setForm] = useState({ title: "", description: "", estimatedHours: "", priority: "medium", skills: "" });
@@ -20,7 +21,7 @@ export default function TaskModal({ onClose, onSuccess }) {
         estimatedHours: Number(form.estimatedHours),
         skills: skillsArray
       });
-      toast.success(`Task assigned to ${res.data.assignedTo} 🎯`);
+      toast.success(`Task assigned to ${res.data.assignedTo}`);
       onSuccess?.();
       onClose();
     } catch (err) {
@@ -34,12 +35,12 @@ export default function TaskModal({ onClose, onSuccess }) {
     <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
       <div className="modal">
         <div className="modal-header">
-          <h2 className="modal-title">⚡ Assign New Task</h2>
-          <button className="modal-close" onClick={onClose}>✕</button>
+          <h2 className="modal-title" style={{ display: 'flex', alignItems: 'center' }}><Zap size={20} style={{ marginRight: '8px' }} /> Assign New Task</h2>
+          <button className="modal-close" onClick={onClose}><X size={20} /></button>
         </div>
 
         <div className="alert alert-info">
-          🤖 <b>Smart Assignment:</b> High priority tasks prioritize completely free employees. Otherwise, the algorithm assigns to the least busy employee.
+          <Bot style={{ marginRight: '6px', verticalAlign: 'middle' }} /> <b>Smart Assignment:</b> High priority tasks prioritize completely free employees. Otherwise, the algorithm assigns to the least busy employee.
         </div>
 
         <form onSubmit={handleSubmit}>
@@ -71,9 +72,9 @@ export default function TaskModal({ onClose, onSuccess }) {
             <div className="form-group">
               <label className="form-label">Priority</label>
               <select className="form-select" value={form.priority} onChange={(e) => setForm({ ...form, priority: e.target.value })}>
-                <option value="low">🟢 Low</option>
-                <option value="medium">🟡 Medium</option>
-                <option value="high">🔴 High</option>
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
               </select>
             </div>
           </div>
@@ -81,7 +82,7 @@ export default function TaskModal({ onClose, onSuccess }) {
           <div className="modal-actions">
             <button type="button" className="btn btn-secondary" onClick={onClose}>Cancel</button>
             <button type="submit" className="btn btn-primary" disabled={loading}>
-              {loading ? "Assigning..." : "⚡ Assign Task"}
+              {loading ? "Assigning..." : <><Zap size={16} style={{ marginRight: '6px', verticalAlign: 'middle' }} /> Assign Task</>}
             </button>
           </div>
         </form>

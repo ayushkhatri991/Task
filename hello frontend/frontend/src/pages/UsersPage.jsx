@@ -4,6 +4,7 @@ import Sidebar from "../components/Sidebar";
 import Navbar from "../components/Navbar";
 import UserModal from "../components/UserModal";
 import toast from "react-hot-toast";
+import { Users, Plus, Edit, Trash2 } from "lucide-react";
 
 export default function UsersPage() {
   const [users, setUsers] = useState([]);
@@ -46,16 +47,16 @@ export default function UsersPage() {
         <div className="page">
           <div className="page-header">
             <div>
-              <h1 className="page-title">👥 Users</h1>
+              <h1 className="page-title"><Users style={{ marginRight: '8px' }} /> Users</h1>
               <p className="page-subtitle">{users.length} registered user{users.length !== 1 ? "s" : ""}</p>
             </div>
             <button id="create-user-btn" className="btn btn-primary" onClick={() => { setEditUser(null); setShowModal(true); }}>
-              ➕ Create User
+              <Plus size={16} /> Create User
             </button>
           </div>
 
           <div className="form-group" style={{ maxWidth: "320px", marginBottom: "1.5rem" }}>
-            <input className="form-input" placeholder="🔍  Search by name or email..." value={search}
+            <input className="form-input" placeholder="Search by name or email..." value={search}
               onChange={(e) => setSearch(e.target.value)} />
           </div>
 
@@ -96,10 +97,10 @@ export default function UsersPage() {
                       <td>
                         <div style={{ display: "flex", gap: "0.5rem" }}>
                           <button className="btn btn-secondary btn-sm" onClick={() => { setEditUser(user); setShowModal(true); }}>
-                            ✏️ Edit
+                            <Edit size={14} style={{ marginRight: '4px' }} /> Edit
                           </button>
                           <button className="btn btn-danger btn-sm" onClick={() => handleDelete(user._id, user.name)}>
-                            🗑️
+                            <Trash2 size={14} />
                           </button>
                         </div>
                       </td>

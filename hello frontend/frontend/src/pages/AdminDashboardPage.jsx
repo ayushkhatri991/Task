@@ -3,6 +3,7 @@ import { getAdminStats, getUserTaskStats } from "../api/dashboard";
 import Sidebar from "../components/Sidebar";
 import Navbar from "../components/Navbar";
 import StatCard from "../components/StatCard";
+import { BarChart3, Users, ClipboardList, CheckCircle, Settings, Hourglass } from "lucide-react";
 
 export default function AdminDashboardPage() {
   const [stats, setStats] = useState(null);
@@ -27,7 +28,7 @@ export default function AdminDashboardPage() {
         <div className="page">
           <div className="page-header">
             <div>
-              <h1 className="page-title">📊 Overview</h1>
+              <h1 className="page-title"><BarChart3 style={{ marginRight: '8px' }} /> Overview</h1>
               <p className="page-subtitle">Real-time snapshot of your task management system</p>
             </div>
           </div>
@@ -37,15 +38,15 @@ export default function AdminDashboardPage() {
           ) : (
             <>
               <div className="stat-grid">
-                <StatCard label="Total Tasks" value={stats?.totalTasks} icon="📋" color="purple" />
-                <StatCard label="Completed" value={stats?.completed} icon="✅" color="emerald" />
-                <StatCard label="In Progress" value={stats?.inProgress} icon="⚙️" color="cyan" />
-                <StatCard label="Pending" value={stats?.pending} icon="⏳" color="amber" />
-                <StatCard label="Employees" value={stats?.employees} icon="👥" color="rose" />
+                <StatCard label="Total Tasks" value={stats?.totalTasks} icon={<ClipboardList size={24} />} color="purple" />
+                <StatCard label="Completed" value={stats?.completed} icon={<CheckCircle size={24} />} color="emerald" />
+                <StatCard label="In Progress" value={stats?.inProgress} icon={<Settings size={24} />} color="cyan" />
+                <StatCard label="Pending" value={stats?.pending} icon={<Hourglass size={24} />} color="amber" />
+                <StatCard label="Employees" value={stats?.employees} icon={<Users size={24} />} color="rose" />
               </div>
 
               <div className="card" style={{ marginTop: "2rem" }}>
-                <div className="section-title">👥 Employee Performance Overview</div>
+                <div className="section-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Users size={20} /> Employee Performance Overview</div>
                 <div className="table-wrapper">
                   <table>
                     <thead>

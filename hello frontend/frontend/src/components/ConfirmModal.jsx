@@ -1,4 +1,5 @@
 import React from "react";
+import { AlertTriangle, X } from "lucide-react";
 
 export default function ConfirmModal({ isOpen, onClose, onConfirm, title, message, confirmText = "Delete", cancelText = "Cancel", loading = false }) {
   if (!isOpen) return null;
@@ -8,9 +9,9 @@ export default function ConfirmModal({ isOpen, onClose, onConfirm, title, messag
       <div className="modal" style={{ maxWidth: "400px" }}>
         <div className="modal-header">
           <h2 className="modal-title" style={{ display: "flex", alignItems: "center", gap: "0.5rem", color: "var(-- rose)" }}>
-            <span>⚠️</span> {title}
+            <AlertTriangle size={20} color="#f59e0b" /> {title}
           </h2>
-          <button className="modal-close" onClick={onClose}>✕</button>
+          <button className="modal-close" onClick={onClose}><X size={20} /></button>
         </div>
         
         <p style={{ color: "var(--text-secondary)", fontSize: "0.95rem", marginBottom: "1.5rem", lineHeight: "1.6" }}>

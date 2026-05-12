@@ -4,6 +4,7 @@ import Sidebar from "../components/Sidebar";
 import Navbar from "../components/Navbar";
 import TaskCard from "../components/TaskCard";
 import TaskModal from "../components/TaskModal";
+import { CheckSquare, Zap, Inbox } from "lucide-react";
 
 export default function TasksPage() {
   const [tasks, setTasks] = useState([]);
@@ -31,11 +32,11 @@ export default function TasksPage() {
         <div className="page">
           <div className="page-header">
             <div>
-              <h1 className="page-title">✅ All Tasks</h1>
+              <h1 className="page-title"><CheckSquare style={{ marginRight: '8px' }} /> All Tasks</h1>
               <p className="page-subtitle">{tasks.length} task{tasks.length !== 1 ? "s" : ""} total</p>
             </div>
             <button id="assign-task-btn" className="btn btn-primary" onClick={() => setShowModal(true)}>
-              ⚡ Assign New Task
+              <Zap size={16} style={{ marginRight: '4px' }} /> Assign New Task
             </button>
           </div>
 
@@ -53,7 +54,7 @@ export default function TasksPage() {
             <div className="spinner-page"><div className="spinner" /><span>Loading tasks...</span></div>
           ) : filtered.length === 0 ? (
             <div className="empty-state">
-              <div className="empty-state-icon">📭</div>
+              <div className="empty-state-icon"><Inbox size={48} /></div>
               <h3>No tasks found</h3>
               <p>Assign a new task using the button above</p>
             </div>

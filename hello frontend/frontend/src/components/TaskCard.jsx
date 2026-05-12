@@ -5,6 +5,7 @@ import PriorityBadge from "./PriorityBadge";
 import ConfirmModal from "./ConfirmModal";
 import toast from "react-hot-toast";
 import { useAuth } from "../context/AuthContext";
+import { User, Trash2, Clock, Play, TrendingUp } from "lucide-react";
 
 const STATUS_OPTIONS = ["pending", "in-progress", "completed"];
 
@@ -65,7 +66,7 @@ export default function TaskCard({ task, onRefresh, showUpdate = true }) {
         <div>
           <div className="task-card-title">{task.title}</div>
           {task.assignedTo && (
-            <div className="task-card-assignee">👤 {task.assignedTo.name || task.assignedTo.email || "Assigned"}</div>
+            <div className="task-card-assignee"><User size={14} style={{ marginRight: '4px', verticalAlign: 'middle' }} /> {task.assignedTo.name || task.assignedTo.email || "Assigned"}</div>
           )}
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
@@ -77,7 +78,7 @@ export default function TaskCard({ task, onRefresh, showUpdate = true }) {
               style={{ padding: "0.4rem", minWidth: "auto", background: "rgba(239, 68, 68, 0.1)", color: "#ef4444", border: "1px solid rgba(239, 68, 68, 0.2)" }}
               title="Delete Task"
             >
-              🗑️
+              <Trash2 size={16} />
             </button>
           )}
           <PriorityBadge priority={task.priority} />
@@ -89,7 +90,7 @@ export default function TaskCard({ task, onRefresh, showUpdate = true }) {
       <div className="task-card-meta">
         <span className={`badge badge-${task.status}`}>{task.status}</span>
         <span className="badge" style={{ background: "rgba(139,92,246,0.1)", color: "var(--purple-light)", border: "1px solid rgba(139,92,246,0.2)" }}>
-          ⏱ {task.estimatedHours}h
+          <Clock size={14} style={{ marginRight: '4px', verticalAlign: 'middle' }} /> {task.estimatedHours}h
         </span>
 
         {canUpdate && (
@@ -113,7 +114,7 @@ export default function TaskCard({ task, onRefresh, showUpdate = true }) {
             disabled={statusLoading}
             style={{ marginLeft: canUpdate ? "0.5rem" : "auto", background: "var(--purple)", color: "white", border: "none" }}
           >
-            ▶ Start Task
+            {canUpdate ? <><Play size={14} style={{ marginRight: '4px', verticalAlign: 'middle' }} /> Start Task</> : "Start Task"}
           </button>
         ) : (
           <button
@@ -123,7 +124,7 @@ export default function TaskCard({ task, onRefresh, showUpdate = true }) {
             title={task.status === "pending" ? "Cannot track pending tasks" : ""}
             style={{ marginLeft: canUpdate ? "0.5rem" : "auto" }}
           >
-            {trackLoading ? "..." : tracking ? "Hide" : "📈 Track"}
+            {trackLoading ? "..." : tracking ? "Hide" : <><TrendingUp size={14} style={{ marginRight: '4px', verticalAlign: 'middle' }} /> Track</>}
           </button>
         )}
       </div>

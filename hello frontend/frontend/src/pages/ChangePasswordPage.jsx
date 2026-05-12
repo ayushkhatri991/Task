@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { changePassword } from "../api/auth";
 import toast from "react-hot-toast";
+import { Zap } from "lucide-react";
 
 export default function ChangePasswordPage() {
   const { token } = useParams();
@@ -25,7 +26,7 @@ export default function ChangePasswordPage() {
         return;
       }
       await changePassword(activeToken, form);
-      toast.success("Password changed successfully! 🔐");
+      toast.success("Password changed successfully!");
       navigate("/login");
     } catch (err) {
       toast.error(err.response?.data?.message || "Token expired or invalid");
@@ -38,8 +39,8 @@ export default function ChangePasswordPage() {
     <div className="auth-page">
       <div className="auth-card">
         <div className="auth-logo">
-          <div className="auth-logo-icon">⚡</div>
-          <span className="auth-logo-text">TaskFlow</span>
+          <div className="auth-logo-icon"><Zap size={28} /></div>
+          <span className="auth-logo-text">Karya Sathi</span>
         </div>
 
         <h2 className="auth-title">Reset your password</h2>

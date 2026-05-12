@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { login as apiLogin } from "../api/auth";
 import { useAuth } from "../context/AuthContext";
 import toast from "react-hot-toast";
+import { Zap } from "lucide-react";
 
 export default function LoginPage() {
   const [form, setForm] = useState({ email: "", password: "" });
@@ -19,7 +20,7 @@ export default function LoginPage() {
       // Decode role from JWT (backend doesn't include role in data object)
       const decoded = JSON.parse(atob(token.split(".")[1]));
       login(data, token);
-      toast.success(`Welcome back, ${data.name}! 👋`);
+      toast.success(`Welcome back, ${data.name}!`);
       navigate(decoded.role === "admin" ? "/admin/dashboard" : "/employee/dashboard");
     } catch (err) {
       toast.error(err.response?.data?.message || "Login failed");
@@ -32,8 +33,8 @@ export default function LoginPage() {
     <div className="auth-page">
       <div className="auth-card">
         <div className="auth-logo">
-          <div className="auth-logo-icon">⚡</div>
-          <span className="auth-logo-text">TaskFlow</span>
+          <div className="auth-logo-icon"><Zap size={28} /></div>
+          <span className="auth-logo-text">Karya Sathi</span>
         </div>
 
         <h2 className="auth-title">Welcome back</h2>

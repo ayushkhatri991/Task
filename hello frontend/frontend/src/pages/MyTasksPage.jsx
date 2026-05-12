@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import Sidebar from "../components/Sidebar";
 import Navbar from "../components/Navbar";
 import TaskCard from "../components/TaskCard";
+import { ClipboardList, Inbox } from "lucide-react";
 
 export default function MyTasksPage() {
   const { user } = useAuth();
@@ -35,7 +36,7 @@ export default function MyTasksPage() {
         <div className="page">
           <div className="page-header">
             <div>
-              <h1 className="page-title">📋 My Tasks</h1>
+              <h1 className="page-title"><ClipboardList style={{ marginRight: '8px' }} /> My Tasks</h1>
               <p className="page-subtitle">{tasks.length} task{tasks.length !== 1 ? "s" : ""} assigned to you</p>
             </div>
           </div>
@@ -58,7 +59,7 @@ export default function MyTasksPage() {
             <div className="spinner-page"><div className="spinner" /><span>Loading your tasks...</span></div>
           ) : filtered.length === 0 ? (
             <div className="empty-state">
-              <div className="empty-state-icon">📭</div>
+              <div className="empty-state-icon"><Inbox size={48} /></div>
               <h3>No tasks in this category</h3>
               <p>Your assigned tasks will show up here</p>
             </div>

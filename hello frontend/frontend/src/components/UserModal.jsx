@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { createUser, updateUser } from "../api/users";
 import toast from "react-hot-toast";
+import { Edit, Plus, X } from "lucide-react";
 
 export default function UserModal({ onClose, onSuccess, editUser }) {
   const [form, setForm] = useState({
@@ -25,10 +26,10 @@ export default function UserModal({ onClose, onSuccess, editUser }) {
 
       if (isEdit) {
         await updateUser(editUser._id, userData);
-        toast.success("User updated successfully ✅");
+        toast.success("User updated successfully");
       } else {
         await createUser(userData);
-        toast.success("User created successfully 🎉");
+        toast.success("User created successfully");
       }
       onSuccess?.();
       onClose();
@@ -43,8 +44,8 @@ export default function UserModal({ onClose, onSuccess, editUser }) {
     <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
       <div className="modal">
         <div className="modal-header">
-          <h2 className="modal-title">{isEdit ? "✏️ Edit User" : "➕ Create User"}</h2>
-          <button className="modal-close" onClick={onClose}>✕</button>
+          <h2 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>{isEdit ? <><Edit size={20} /> Edit User</> : <><Plus size={20} /> Create User</>}</h2>
+          <button className="modal-close" onClick={onClose}><X size={20} /></button>
         </div>
 
         <form onSubmit={handleSubmit}>

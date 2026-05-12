@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { register as apiRegister } from "../api/auth";
 import toast from "react-hot-toast";
+import { Zap } from "lucide-react";
 
 export default function RegisterPage() {
   const [form, setForm] = useState({ name: "", email: "", password: "", skills: "" });
@@ -14,7 +15,7 @@ export default function RegisterPage() {
     try {
       const skillsArray = form.skills.split(",").map(s => s.trim()).filter(s => s !== "");
       await apiRegister({ ...form, skills: skillsArray });
-      toast.success("Account created! Please log in. 🎉");
+      toast.success("Account created! Please log in.");
       navigate("/login");
     } catch (err) {
       toast.error(err.response?.data?.message || "Registration failed");
@@ -27,12 +28,12 @@ export default function RegisterPage() {
     <div className="auth-page">
       <div className="auth-card">
         <div className="auth-logo">
-          <div className="auth-logo-icon">⚡</div>
-          <span className="auth-logo-text">TaskFlow</span>
+          <div className="auth-logo-icon"><Zap size={28} /></div>
+          <span className="auth-logo-text">Karya Sathi</span>
         </div>
 
         <h2 className="auth-title">Create account</h2>
-        <p className="auth-subtitle">Join TaskFlow and start managing tasks smarter</p>
+        <p className="auth-subtitle">Join Karya Sathi and start managing tasks smarter</p>
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">

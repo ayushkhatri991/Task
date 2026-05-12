@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { forgotPassword } from "../api/auth";
 import toast from "react-hot-toast";
+import { Zap, CheckCircle } from "lucide-react";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -14,7 +15,7 @@ export default function ForgotPasswordPage() {
     try {
       await forgotPassword({ email });
       setSent(true);
-      toast.success("Reset link sent to your email 📧");
+      toast.success("Reset link sent to your email");
     } catch (err) {
       toast.error(err.response?.data?.message || "User not found");
     } finally {
@@ -26,8 +27,8 @@ export default function ForgotPasswordPage() {
     <div className="auth-page">
       <div className="auth-card">
         <div className="auth-logo">
-          <div className="auth-logo-icon">⚡</div>
-          <span className="auth-logo-text">TaskFlow</span>
+          <div className="auth-logo-icon"><Zap size={28} /></div>
+          <span className="auth-logo-text">Karya Sathi</span>
         </div>
 
         <h2 className="auth-title">Forgot password?</h2>
@@ -36,7 +37,7 @@ export default function ForgotPasswordPage() {
         {sent ? (
           <>
             <div className="alert alert-success" style={{ marginTop: "1rem" }}>
-              ✅ Check your inbox! A password reset link has been sent to <strong>{email}</strong>.
+              <CheckCircle size={18} style={{ marginRight: '6px', verticalAlign: 'middle' }} /> Check your inbox! A password reset link has been sent to <strong>{email}</strong>.
             </div>
             <div className="auth-link" style={{ marginTop: "1.5rem" }}>
               Already have a reset token? <Link to="/auth/change-password">Enter it manually here</Link>
