@@ -73,15 +73,20 @@ export const createTask = async (req, res) => {
     }
 
     // Get active employees
-    const users = await User.find({ role: "employee" });
-
+    const users = await User.find({ role: "employee", active: true });
+    if(!users || users.length === 0){
+      return res.status(404).json({
+        success: false,
+        message: "No active employees found",
+      })
+    }
   
 
     // users based on similar skills 
     let eligibleUsers = [...users];
     if (skills && skills.length > 0) {
       const matchingUsers = users.filter((u) =>
-        skills.every((skill) => u.skills.includes(skill))
+        skills.every((skill) => (u.skills || []).some((userSkill) => userSkill && userSkill.toLowerCase() === skill.toLowerCase()))
       );
       
       if (matchingUsers.length > 0) {
@@ -146,6 +151,13 @@ const workload = tasks.reduce((sum, task) => {
   }
 }
 
+    if (!selectedUser) {
+      return res.status(400).json({
+        success: false,
+        message: "No eligible active users available to assign the task.",
+      });
+    }
+
     // Create task
     const task = await Task.create({
       title,
@@ -167,12 +179,12 @@ const workload = tasks.reduce((sum, task) => {
       taskId: task._id
     });
 
-    // Send email notification
-    await sendEmail(
+    // Send email notification (non-blocking)
+    sendEmail(
       selectedUser.email,
       "New Task Assigned",
       notificationMessage
-    );
+    ).catch(err => console.error("Failed to send email non-blocking:", err));
 
     return res.status(201).json({
       success: true,
