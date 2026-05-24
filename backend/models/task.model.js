@@ -39,8 +39,25 @@ const taskSchema = new mongoose.Schema({
   skills: {
     type: [String],
     default: []
-  }
+  },
 
+  // When task was assigned/reassigned to current user (starts the 8-hour timer)
+  assignedAt: {
+    type: Date,
+    default: Date.now
+  },
+
+  // How many times this task has been auto-reassigned (max 3)
+  reassignCount: {
+    type: Number,
+    default: 0
+  },
+
+  // Users who were previously assigned this task (excluded from future reassignment)
+  previousAssignees: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User"
+  }]
 
 }, { timestamps: true });
 

@@ -9,6 +9,7 @@ import taskRouter from "./routes/task.routes.js"
 import dashRouter from "./routes/dash.routes.js"
 import notificationRouter from "./routes/notification.routes.js"
 import { createServer } from "http";
+import { startReassignCron } from "./utils/reassign.cron.js";
 dotenv.config();
 //swagger 
 import swaggerJSDoc from "swagger-jsdoc"
@@ -68,4 +69,5 @@ app.use("/notifications", notificationRouter)
 
 server.listen(PORT,()=>{
     console.log(`Server is running on http://localhost:${PORT}`)
+    startReassignCron();
 })

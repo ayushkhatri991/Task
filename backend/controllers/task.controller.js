@@ -2,6 +2,7 @@ import Task from "../models/task.model.js";
 import User from "../models/user.model.js";
 import Notification from "../models/notification.model.js";
 import { sendEmail } from "../utils/email.util.js";
+import { findBestAssignee } from "../utils/assignment.util.js";
 
 // Priority weights for sorting
 const PRIORITY_WEIGHT = { high: 3, medium: 2, low: 1 };
@@ -72,93 +73,21 @@ export const createTask = async (req, res) => {
       });
     }
 
-    // Get active employees
-    const users = await User.find({ role: "employee", active: true });
-    if(!users || users.length === 0){
-      return res.status(404).json({
-        success: false,
-        message: "No active employees found",
-      })
-    }
-  
-
-    // users based on similar skills 
-    let eligibleUsers = [...users];
-    if (skills && skills.length > 0) {
-      const matchingUsers = users.filter((u) =>
-        skills.every((skill) => (u.skills || []).some((userSkill) => userSkill && userSkill.toLowerCase() === skill.toLowerCase()))
-      );
-      
-      if (matchingUsers.length > 0) {
-        eligibleUsers = matchingUsers;
-      } else {
-        return res.status(400).json({
-          success: false,
-          message: "No users found with all required skills",
-        });
-      }
-    }
-
-let selectedUser = null;
-let minWorkload = Infinity;
-
-//High and medium priority logic
-if (priority === "high" || priority === "medium") {
-  for (let user of eligibleUsers) {
-    const existingTask = await Task.findOne({
-      assignedTo: user._id,
-      status: "in-progress"
+    // Use the shared assignment utility to find the best user
+    const selectedUser = await findBestAssignee({
+      skills,
+      priority,
+      excludeUserIds: []
     });
-
-    // Pick immediately if no active task
-    if (!existingTask) {
-      selectedUser = user;
-      break;
-    }
-  }
-}
-
-// If no free user OR not high or medium priority → use workload
-if (!selectedUser) {
-  const now = new Date();
-
-  for (let user of eligibleUsers) {
-    const tasks = await Task.find({
-      assignedTo: user._id,
-      status: { $in: ["pending", "in-progress"] }
-    });
-
-const workload = tasks.reduce((sum, task) => {
-  let remaining = Number(task.estimatedHours) || 0;
-
-  if (task.status === "in-progress" && task.startedAt) {
-    const start = new Date(task.startedAt).getTime();
-    const nowTime = now.getTime();
-
-    if (!isNaN(start) && nowTime > start) {
-      const elapsed = (nowTime - start) / (1000 * 60 * 60);
-      remaining = Math.max(remaining - elapsed, 0);
-    }
-  }
-
-  return sum + remaining;
-}, 0);
-
-    if (workload < minWorkload) {
-      minWorkload = workload;
-      selectedUser = user;
-    }
-  }
-}
 
     if (!selectedUser) {
       return res.status(400).json({
         success: false,
-        message: "No eligible active users available to assign the task.",
+        message: "No eligible users available to assign the task.",
       });
     }
 
-    // Create task
+    // Create task with assignedAt for the 8-hour reassignment timer
     const task = await Task.create({
       title,
       description,
@@ -166,7 +95,8 @@ const workload = tasks.reduce((sum, task) => {
       estimatedHours,
       priority,
       status: "pending",
-      skills: skills || []
+      skills: skills || [],
+      assignedAt: new Date()
     });
 
     await task.populate("assignedTo", "name email");
