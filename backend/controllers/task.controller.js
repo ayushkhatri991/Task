@@ -147,6 +147,14 @@ export const updateProgress = async (req, res) => {
       });
     }
 
+    // Prevent modifying a completed task
+    if (task.status === "completed") {
+      return res.status(400).json({
+        success: false,
+        message: "Completed tasks cannot be modified",
+      });
+    }
+
     // Update status
     if (status) {
       task.status = status;
@@ -157,9 +165,6 @@ export const updateProgress = async (req, res) => {
       
       if (status === "completed") {
         task.completedAt = new Date();
-      } else {
-        // If status moved back from completed, clear it
-        task.completedAt = undefined;
       }
     }
 
